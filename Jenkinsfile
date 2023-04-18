@@ -31,6 +31,22 @@ pipeline {
                 }
             }
         }
+        stage('Publish Reports') {
+      steps {
+        // Publish JUnit test results
+        junit 'path/to/test/reports/*.xml'
+
+        // Generate and publish HTML reports
+        publishHTML target: [
+          allowMissing: false,
+          alwaysLinkToLastBuild: true,
+          keepAll: true,
+          reportDir: 'path/to/html/reports',
+          reportFiles: 'index.html',
+          reportName: 'HTML Report'
+        ]
+      }
+    }
     } 
     post {
         always {

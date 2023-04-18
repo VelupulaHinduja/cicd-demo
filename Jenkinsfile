@@ -7,6 +7,7 @@ pipeline {
         stage ('Build') {  
             when { expression { return params.Build }} 
             steps {
+                    sh "mvn site"
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'pass', usernameVariable: 'user')]) {
                     sh "docker build -t ${user}/helloapp:${currentBuild.number} ."
                     sh "docker tag ${user}/helloapp:${currentBuild.number} ${user}/helloapp:latest"
@@ -31,29 +32,10 @@ pipeline {
                 }
             }
         }
-        stage('Publish Reports') {
-      steps {
-        // Publish JUnit test results
-        junit 'path/to/test/reports/*.xml'
-
-        // Generate and publish HTML reports
-        publishHTML target: [
-          allowMissing: false,
-          alwaysLinkToLastBuild: true,
-          keepAll: true,
-          reportDir: 'path/to/html/reports',
-          reportFiles: 'index.html',
-          reportName: 'HTML Report'
-        ]
-      }
-    }
     } 
     post {
         always {
-           recordIssues(
-               enabledForFailure: true, aggregatingResults: true, 
-               tools: [java(), checkStyle(pattern: 'checkstyle-result.xml', reportEncoding: 'UTF-8'), findBugs(pattern: 'findbugs.xml')]
-           )               
+           archiveArtifacts artifacts: 'target/site/**'           
         }
     }
 } 
